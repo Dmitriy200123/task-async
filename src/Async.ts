@@ -3,6 +3,9 @@
 который завершится через заданное количество миллисекунд со значением, переданным в аргумент.
  */
 export function mock(ms: number): Promise<number> {
+    return new Promise<number>((resolve) => {
+        setTimeout(() => resolve(ms), ms);
+    });
 }
 
 /*
@@ -11,19 +14,14 @@ export function mock(ms: number): Promise<number> {
 export function getData(): Promise<number[]> {
     const result: number[] = [];
 
-    return mock(100)
-        .then((data1) => {
+    return Promise.all([mock(100), mock(200), mock(300)]).then(
+        ([data1, data2, data3]) => {
             result.push(data1);
-            return mock(200);
-        })
-        .then((data2) => {
             result.push(data2);
-            return mock(300);
-        })
-        .then((data3) => {
             result.push(data3);
             return result;
-        });
+        },
+    );
 }
 
 /*
@@ -32,7 +30,7 @@ export function getData(): Promise<number[]> {
  */
 export async function catchException(): Promise<string | undefined> {
     try {
-        Promise.reject(new Error('my error'));
+        await Promise.reject(new Error('my error'));
     } catch (err) {
         return err.message;
     }
